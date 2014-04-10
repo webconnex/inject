@@ -54,8 +54,8 @@ func TestMap(t *testing.T) {
 		t.Error(e)
 	}
 
-	injector.Map(&Foo{}, (*Foo)(nil), (*interface{})(nil))
-	if e := tester.HasLen(injector.values, 3); e != nil {
+	injector.MapTo(Foo{}, (*interface{})(nil))
+	if e := tester.HasLen(injector.values, 2); e != nil {
 		t.Error(e)
 	}
 }
@@ -116,13 +116,4 @@ func TestInvokePanicNonFunc(t *testing.T) {
 		}
 	}()
 	injector.Invoke(42)
-}
-
-func TestInvokeNil(t *testing.T) {
-	injector := New(nil).(*injector)
-	values := injector.Invoke(nil)
-
-	if e := tester.IsNil(values); e != nil {
-		t.Error(e)
-	}
 }
