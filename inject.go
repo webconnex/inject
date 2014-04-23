@@ -144,6 +144,27 @@ func (j *injector) SetNamedValue(name string, val reflect.Value) {
 	j.namedValues[name] = val
 }
 
+func simpleConvert(src reflect.Value, typ reflect.Type) reflect.Value {
+	dst := reflect.New(typ).Elem()
+	switch typ.Kind() {
+	case reflect.String:
+		dst.SetString(src.String())
+	case reflect.Slice:
+		if typ.Elem().Kind() == reflect.Uint8 {
+			dst.SetBytes(src.Bytes())
+		}
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		dst.SetInt(src.Int())
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		dst.SetInt(src.Int())
+	case reflect.Float32, reflect.Float64:
+		dst.SetFloat(src.Float())
+	default:
+		panic(fmt.Sprintf("cannot convert %s to %s", src.Type(), typ))
+	}
+	return dst
+}
+
 func (j *injector) InvokeNamed(fn interface{}, names ...string) []interface{} {
 	fval := reflect.ValueOf(fn)
 	ftyp := fval.Type()
@@ -160,6 +181,9 @@ func (j *injector) InvokeNamed(fn interface{}, names ...string) []interface{} {
 		var val reflect.Value
 		if name := names[i]; len(name) > 0 {
 			val = j.GetNamedValue(name)
+			if val.Type() != typ {
+				val = simpleConvert(val, typ)
+			}
 		} else {
 			val = j.GetValue(typ)
 		}
