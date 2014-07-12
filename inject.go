@@ -159,6 +159,8 @@ func simpleConvert(src reflect.Value, typ reflect.Type) reflect.Value {
 		dst.SetInt(src.Int())
 	case reflect.Float32, reflect.Float64:
 		dst.SetFloat(src.Float())
+	case reflect.Interface:
+		dst.Set(src)
 	default:
 		panic(fmt.Sprintf("cannot convert %s to %s", src.Type(), typ))
 	}
